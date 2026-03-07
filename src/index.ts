@@ -146,6 +146,46 @@ const bot = createBot({
     async interactionCreate(interaction) {
       if (interaction.type !== InteractionTypes.ApplicationCommand) return;
 
+      const userId = (interaction as any).user?.id;
+      if (
+        userId &&
+        config.watchedUserIds.includes(userId) &&
+        interaction.data?.name !== "antironi"
+      ) {
+        const guildId = interaction.guildId?.toString();
+        if (guildId) {
+          try {
+            await bot.helpers.sendInteractionResponse(
+              interaction.id,
+              interaction.token,
+              {
+                type: 4,
+                data: { content: "nice try lol" },
+              },
+            );
+            await bot.helpers.editMember(guildId, userId, {
+              communicationDisabledUntil: new Date(
+                Date.now() + 45000,
+              ).toISOString(),
+            });
+            const msg = await bot.helpers.sendFollowupMessage(
+              interaction.token,
+              { content: "FUCKING LOSER LMAOOOOOO LLLLLLLL" },
+            );
+            setTimeout(
+              () =>
+                bot.helpers
+                  .deleteMessage(msg.channelId.toString(), msg.id)
+                  .catch(() => {}),
+              15000,
+            );
+          } catch (e) {
+            console.error("Failed to timeout watcher:", e);
+          }
+        }
+        return;
+      }
+
       if (interaction.data?.name === "antironi") {
         const duration = getOption(interaction, "duration") ?? 30;
         const type = getOption(interaction, "type");
