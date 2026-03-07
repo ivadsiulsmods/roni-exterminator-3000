@@ -56,6 +56,8 @@ const bot = createBot({
       const userId = author.id;
       if (!userId) return;
 
+      if (!message.guildId) return;
+
       if (!config.watchedUserIds.includes(userId)) return;
 
       if (usersPreventedFromMessaging.has(userId)) {
