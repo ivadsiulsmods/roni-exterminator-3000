@@ -87,6 +87,23 @@ const bot = createBot({
           att.contentType?.includes("image/gif"),
       );
 
+      const getMsgContent = () => {
+        let content = "";
+
+        if (isGifOrInstagramLink(content)) {
+          content = "yes (link)";
+        }
+        if (hasGifAttachment) {
+          content = content + "yes (attachment)";
+        }
+
+        return content;
+      };
+
+      await bot.helpers.sendMessage(message.channelId.toString(), {
+        content: getMsgContent(),
+      });
+
       console.log(isGifOrInstagramLink(content), hasGifAttachment);
 
       if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
