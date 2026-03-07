@@ -70,9 +70,13 @@ const bot = createBot({
 
         const dmChannel = await bot.helpers.getDmChannel(userId);
 
-        await bot.helpers.sendMessage(dmChannel.id.toString(), {
-          content: customDm ?? randomMessage,
-        });
+        try {
+          await bot.helpers.sendMessage(dmChannel.id.toString(), {
+            content: customDm ?? randomMessage,
+          });
+        } catch (e) {
+          console.error("Failed to send DM:", e);
+        }
 
         return;
       }
@@ -108,15 +112,19 @@ const bot = createBot({
           ];
 
         const dmChannel = await bot.helpers.getDmChannel(userId);
-        await bot.helpers.sendMessage(dmChannel.id.toString(), {
-          content: randomMessage,
-        });
+        try {
+          await bot.helpers.sendMessage(dmChannel.id.toString(), {
+            content: randomMessage,
+          });
+        } catch (e) {
+          console.error("Failed to send DM:", e);
+        }
       } catch (error) {
         console.error("Failed to timeout user:", error);
       }
     },
 
-    interactionCreate(interaction) {
+    async interactionCreate(interaction) {
       if (interaction.type !== InteractionTypes.ApplicationCommand) return;
 
       if (interaction.data?.name === "antironi") {
@@ -132,22 +140,21 @@ const bot = createBot({
         });
 
         if (type === "timeout") {
-          const channelId = interaction.channelId?.toString();
+          const token = interaction.token;
           const guildId = interaction.guildId?.toString();
-          if (!channelId || !guildId) {
-            console.error("No channelId or guildId found for interaction");
+          if (!guildId) {
+            console.error("No guildId found for interaction");
             return;
           }
-          bot.helpers.sendMessage(channelId, {
-            content: "Loading the GLOCK...",
-          });
 
-          Bun.sleep(2000).then(() => {
-            bot.helpers.sendMessage(channelId, {
-              content: "GLOCK loaded, say goodbye....",
-            });
+          Bun.sleep(2000).then(async () => {
+            try {
+              await bot.helpers.sendFollowupMessage(token, { content: "GLOCK loaded, say goodbye...." });
+            } catch (err) {
+              console.error("Failed to send followup:", err);
+            }
 
-            Bun.sleep(1000).then(() => {
+            Bun.sleep(1000).then(async () => {
               for (const userId of config.watchedUserIds) {
                 bot.helpers.editMember(guildId, userId, {
                   communicationDisabledUntil: new Date(
@@ -155,38 +162,43 @@ const bot = createBot({
                   ).toISOString(),
                 });
 
-                bot.helpers.sendMessage(channelId, {
-                  content: "Timed out: <@" + userId + ">",
-                });
+                try {
+                  await bot.helpers.sendFollowupMessage(token, { content: "Timed out: <@" + userId + ">" });
+                } catch (err) {
+                  console.error("Failed to send followup:", err);
+                }
 
                 const randomMessage =
                   config.dmMessages[
                     Math.floor(Math.random() * config.dmMessages.length)
                   ];
 
-                bot.helpers.getDmChannel(userId).then((dmChannel) => {
-                  bot.helpers.sendMessage(dmChannel.id.toString(), {
+                try {
+                  const dmChannel = await bot.helpers.getDmChannel(userId);
+                  await bot.helpers.sendMessage(dmChannel.id.toString(), {
                     content: customDm ?? randomMessage,
                   });
-                });
+                } catch (err) {
+                  console.error("Failed to send DM:", err);
+                }
               }
             });
           });
         } else if (type === "prevent-messages") {
-          const channelId = interaction.channelId?.toString();
-          if (!channelId) {
-            console.error("No channelId found for interaction");
-            return;
-          }
+          const token = interaction.token;
           for (const userId of config.watchedUserIds) {
-            bot.helpers.sendMessage(channelId, {
-              content:
-                "Let's just say... you won't be hearing from <@" +
-                userId +
-                "> for the next " +
-                duration.toString() +
-                " seconds...",
-            });
+            try {
+              await bot.helpers.sendFollowupMessage(token, {
+                content:
+                  "Let's just say... you won't be hearing from <@" +
+                  userId +
+                  "> for the next " +
+                  duration.toString() +
+                  " seconds...",
+              });
+            } catch (err) {
+              console.error("Failed to send followup:", err);
+            }
 
             usersPreventedFromMessaging.set(userId, customDm);
 
