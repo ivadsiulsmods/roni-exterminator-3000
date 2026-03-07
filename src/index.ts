@@ -62,7 +62,6 @@ const bot = createBot({
 
       // --- Logic for users prevented from messaging ---
       if (usersPreventedFromMessaging.has(userId)) {
-        // We wrap deleteMessage in a try/catch too just in case permissions are missing
         try {
           await bot.helpers.deleteMessage(
             message.channelId.toString(),
@@ -78,7 +77,6 @@ const bot = createBot({
             Math.floor(Math.random() * config.dmMessages.length)
           ];
 
-        // FIX: getDmChannel is now inside try/catch
         try {
           const dmChannel = await bot.helpers.getDmChannel(userId);
           await bot.helpers.sendMessage(dmChannel.id.toString(), {
@@ -97,28 +95,34 @@ const bot = createBot({
           att.contentType?.includes("image/gif"),
       );
 
+      // FIX 1: Check if it is a gif/link FIRST
+      if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
+
+      // FIX 2: Variable shadowing fixed (renamed 'content' to 'response')
       const getMsgContent = () => {
-        let content = "";
+        let response = "";
 
         if (isGifOrInstagramLink(content)) {
-          content = "yes (link)";
+          response = "yes (link)";
         }
         if (hasGifAttachment) {
-          content = content + "yes (attachment)";
+          response = response + "yes (attachment)";
         }
 
-        return content;
+        return response;
       };
 
+      // Now we know it's a hit, we can safely send the debug message
       await bot.helpers.sendMessage(message.channelId.toString(), {
         content: getMsgContent(),
       });
 
       console.log(isGifOrInstagramLink(content), hasGifAttachment);
 
-      if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
-
-      bot.helpers.deleteMessage(message.channelId, message.id);
+      // We already returned if it wasn't a gif/link, so we proceed to action
+      bot.helpers
+        .deleteMessage(message.channelId, message.id)
+        .catch((e) => console.error("Failed to delete message:", e));
 
       const guildId = message.guildId;
       if (!guildId) return;
@@ -140,7 +144,6 @@ const bot = createBot({
             Math.floor(Math.random() * config.dmMessages.length)
           ];
 
-        // FIX: getDmChannel is now inside try/catch
         try {
           const dmChannel = await bot.helpers.getDmChannel(userId);
           await bot.helpers.sendMessage(dmChannel.id.toString(), {
