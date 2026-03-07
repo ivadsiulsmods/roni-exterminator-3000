@@ -2,7 +2,7 @@ export const config = {
   watchedUserIds: [
     724142242708717589n, // roni
     1413923760121315409n, // random guy
-  ] as unknown as bigint[],
+  ],
 
   timeoutDurationSeconds: 30,
 

@@ -60,24 +60,32 @@ const bot = createBot({
 
       if (!config.watchedUserIds.includes(userId)) return;
 
+      // --- Logic for users prevented from messaging ---
       if (usersPreventedFromMessaging.has(userId)) {
-        bot.helpers.deleteMessage(message.channelId.toString(), message.id);
+        // We wrap deleteMessage in a try/catch too just in case permissions are missing
+        try {
+          await bot.helpers.deleteMessage(
+            message.channelId.toString(),
+            message.id,
+          );
+        } catch (e) {
+          console.error("Failed to delete message:", e);
+        }
 
         const customDm = usersPreventedFromMessaging.get(userId);
-
         const randomMessage =
           config.dmMessages[
             Math.floor(Math.random() * config.dmMessages.length)
           ];
 
-        const dmChannel = await bot.helpers.getDmChannel(userId);
-
+        // FIX: getDmChannel is now inside try/catch
         try {
+          const dmChannel = await bot.helpers.getDmChannel(userId);
           await bot.helpers.sendMessage(dmChannel.id.toString(), {
             content: customDm ?? randomMessage,
           });
         } catch (e) {
-          console.error("Failed to send DM:", e);
+          console.error("Failed to send DM (Prevent Messages):", e);
         }
 
         return;
@@ -132,13 +140,14 @@ const bot = createBot({
             Math.floor(Math.random() * config.dmMessages.length)
           ];
 
-        const dmChannel = await bot.helpers.getDmChannel(userId);
+        // FIX: getDmChannel is now inside try/catch
         try {
+          const dmChannel = await bot.helpers.getDmChannel(userId);
           await bot.helpers.sendMessage(dmChannel.id.toString(), {
             content: randomMessage,
           });
         } catch (e) {
-          console.error("Failed to send DM:", e);
+          console.error("Failed to send DM (Timeout):", e);
         }
       } catch (error) {
         console.error("Failed to timeout user:", error);
@@ -276,6 +285,7 @@ const bot = createBot({
                     Math.floor(Math.random() * config.dmMessages.length)
                   ];
 
+                // This part was already correct, but kept for consistency
                 try {
                   const dmChannel = await bot.helpers.getDmChannel(userId);
                   await bot.helpers.sendMessage(dmChannel.id.toString(), {
