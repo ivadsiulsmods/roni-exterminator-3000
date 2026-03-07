@@ -59,7 +59,7 @@ const bot = createBot({
       if (!config.watchedUserIds.includes(userId)) return;
 
       if (usersPreventedFromMessaging.has(userId)) {
-        bot.helpers.deleteMessage(message.channelId, message.id);
+        bot.helpers.deleteMessage(message.channelId.toString(), message.id);
 
         const customDm = usersPreventedFromMessaging.get(userId);
 
@@ -70,7 +70,7 @@ const bot = createBot({
 
         const dmChannel = await bot.helpers.getDmChannel(userId);
 
-        await bot.helpers.sendMessage(dmChannel.id, {
+        await bot.helpers.sendMessage(dmChannel.id.toString(), {
           content: customDm ?? randomMessage,
         });
 
@@ -108,7 +108,7 @@ const bot = createBot({
           ];
 
         const dmChannel = await bot.helpers.getDmChannel(userId);
-        await bot.helpers.sendMessage(dmChannel.id, {
+        await bot.helpers.sendMessage(dmChannel.id.toString(), {
           content: randomMessage,
         });
       } catch (error) {
@@ -132,24 +132,30 @@ const bot = createBot({
         });
 
         if (type === "timeout") {
-          bot.helpers.sendMessage(interaction.channelId?.toString()!, {
+          const channelId = interaction.channelId?.toString();
+          const guildId = interaction.guildId?.toString();
+          if (!channelId || !guildId) {
+            console.error("No channelId or guildId found for interaction");
+            return;
+          }
+          bot.helpers.sendMessage(channelId, {
             content: "Loading the GLOCK...",
           });
 
           Bun.sleep(2000).then(() => {
-            bot.helpers.sendMessage(interaction.channelId?.toString()!, {
+            bot.helpers.sendMessage(channelId, {
               content: "GLOCK loaded, say goodbye....",
             });
 
             Bun.sleep(1000).then(() => {
               for (const userId of config.watchedUserIds) {
-                bot.helpers.editMember(interaction.guildId!, userId, {
+                bot.helpers.editMember(guildId, userId, {
                   communicationDisabledUntil: new Date(
                     Date.now() + duration * 1000,
                   ).toISOString(),
                 });
 
-                bot.helpers.sendMessage(interaction.channelId?.toString()!, {
+                bot.helpers.sendMessage(channelId, {
                   content: "Timed out: <@" + userId + ">",
                 });
 
@@ -159,7 +165,7 @@ const bot = createBot({
                   ];
 
                 bot.helpers.getDmChannel(userId).then((dmChannel) => {
-                  bot.helpers.sendMessage(dmChannel.id, {
+                  bot.helpers.sendMessage(dmChannel.id.toString(), {
                     content: customDm ?? randomMessage,
                   });
                 });
@@ -167,8 +173,13 @@ const bot = createBot({
             });
           });
         } else if (type === "prevent-messages") {
+          const channelId = interaction.channelId?.toString();
+          if (!channelId) {
+            console.error("No channelId found for interaction");
+            return;
+          }
           for (const userId of config.watchedUserIds) {
-            bot.helpers.sendMessage(interaction.channelId?.toString()!, {
+            bot.helpers.sendMessage(channelId, {
               content:
                 "Let's just say... you won't be hearing from <@" +
                 userId +
