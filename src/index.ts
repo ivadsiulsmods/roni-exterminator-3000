@@ -157,9 +157,20 @@ const bot = createBot({
 
             Bun.sleep(1000).then(async () => {
               for (const userId of config.watchedUserIds) {
+                let additionalTime = duration * 1000;
+                try {
+                  const member = await bot.helpers.getMember(guildId, userId) as any;
+                  if (member?.communicationDisabledUntil) {
+                    const currentTimeout = new Date(member.communicationDisabledUntil).getTime();
+                    if (currentTimeout > Date.now()) {
+                      additionalTime += currentTimeout - Date.now();
+                    }
+                  }
+                } catch (e) {}
+
                 bot.helpers.editMember(guildId, userId, {
                   communicationDisabledUntil: new Date(
-                    Date.now() + duration * 1000,
+                    Date.now() + additionalTime,
                   ).toISOString(),
                 });
 
