@@ -87,6 +87,8 @@ const bot = createBot({
           att.contentType?.includes("image/gif"),
       );
 
+      console.log(isGifOrInstagramLink(content), hasGifAttachment);
+
       if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
 
       bot.helpers.deleteMessage(message.channelId, message.id);
@@ -149,21 +151,42 @@ const bot = createBot({
 
           Bun.sleep(2000).then(async () => {
             try {
-              const msg = await bot.helpers.sendFollowupMessage(token, { content: "GLOCK loaded, say goodbye...." });
-              setTimeout(() => bot.helpers.deleteMessage(msg.channelId.toString(), msg.id).catch(() => {}), 15000);
+              const msg = await bot.helpers.sendFollowupMessage(token, {
+                content: "GLOCK loaded, say goodbye....",
+              });
+              setTimeout(
+                () =>
+                  bot.helpers
+                    .deleteMessage(msg.channelId.toString(), msg.id)
+                    .catch(() => {}),
+                15000,
+              );
             } catch (err) {
               console.error("Failed to send followup:", err);
             }
 
             Bun.sleep(1000).then(async () => {
+              const maxTimeoutDuration = 120 * 1000; // 2 minutes max
               for (const userId of config.watchedUserIds) {
-                let additionalTime = duration * 1000;
+                let additionalTime = Math.min(
+                  duration * 1000,
+                  maxTimeoutDuration,
+                );
                 try {
-                  const member = await bot.helpers.getMember(guildId, userId) as any;
+                  const member = (await bot.helpers.getMember(
+                    guildId,
+                    userId,
+                  )) as any;
                   if (member?.communicationDisabledUntil) {
-                    const currentTimeout = new Date(member.communicationDisabledUntil).getTime();
+                    const currentTimeout = new Date(
+                      member.communicationDisabledUntil,
+                    ).getTime();
                     if (currentTimeout > Date.now()) {
                       additionalTime += currentTimeout - Date.now();
+                      additionalTime = Math.min(
+                        additionalTime,
+                        maxTimeoutDuration,
+                      );
                     }
                   }
                 } catch (e) {}
@@ -175,8 +198,16 @@ const bot = createBot({
                 });
 
                 try {
-                  const msg = await bot.helpers.sendFollowupMessage(token, { content: "Timed out: <@" + userId + ">" });
-                  setTimeout(() => bot.helpers.deleteMessage(msg.channelId.toString(), msg.id).catch(() => {}), 15000);
+                  const msg = await bot.helpers.sendFollowupMessage(token, {
+                    content: "Timed out: <@" + userId + ">",
+                  });
+                  setTimeout(
+                    () =>
+                      bot.helpers
+                        .deleteMessage(msg.channelId.toString(), msg.id)
+                        .catch(() => {}),
+                    15000,
+                  );
                 } catch (err) {
                   console.error("Failed to send followup:", err);
                 }
@@ -209,7 +240,13 @@ const bot = createBot({
                   duration.toString() +
                   " seconds...",
               });
-              setTimeout(() => bot.helpers.deleteMessage(msg.channelId.toString(), msg.id).catch(() => {}), 15000);
+              setTimeout(
+                () =>
+                  bot.helpers
+                    .deleteMessage(msg.channelId.toString(), msg.id)
+                    .catch(() => {}),
+                15000,
+              );
             } catch (err) {
               console.error("Failed to send followup:", err);
             }
