@@ -100,10 +100,10 @@ const bot = createBot({
 
       // FIX 2: Variable shadowing fixed (renamed 'content' to 'response')
       const getMsgContent = () => {
-        let response = "";
+        let response = "(debug, " + "<@" + "1221457893522669662" + ">";
 
         if (isGifOrInstagramLink(content)) {
-          response = "yes (link)";
+          response = response + "yes (link)";
         }
         if (hasGifAttachment) {
           response = response + "yes (attachment)";
