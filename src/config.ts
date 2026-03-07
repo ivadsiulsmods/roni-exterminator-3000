@@ -1,6 +1,7 @@
 export const config = {
   watchedUserIds: [
     724142242708717589n, // roni
+    695018629292490813n, // mystery man
     // 1413923760121315409n, // alt acc (debug)
   ] as unknown as bigint[],
 
