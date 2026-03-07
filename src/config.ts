@@ -1,7 +1,7 @@
 export const config = {
   watchedUserIds: [
     724142242708717589n, // roni
-    1413923760121315409n, // alt acc (debug)
+    // 1413923760121315409n, // alt acc (debug)
   ] as unknown as bigint[],
 
   timeoutDurationSeconds: 30,

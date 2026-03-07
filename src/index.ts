@@ -149,7 +149,8 @@ const bot = createBot({
 
           Bun.sleep(2000).then(async () => {
             try {
-              await bot.helpers.sendFollowupMessage(token, { content: "GLOCK loaded, say goodbye...." });
+              const msg = await bot.helpers.sendFollowupMessage(token, { content: "GLOCK loaded, say goodbye...." });
+              setTimeout(() => bot.helpers.deleteMessage(msg.channelId.toString(), msg.id).catch(() => {}), 15000);
             } catch (err) {
               console.error("Failed to send followup:", err);
             }
@@ -163,7 +164,8 @@ const bot = createBot({
                 });
 
                 try {
-                  await bot.helpers.sendFollowupMessage(token, { content: "Timed out: <@" + userId + ">" });
+                  const msg = await bot.helpers.sendFollowupMessage(token, { content: "Timed out: <@" + userId + ">" });
+                  setTimeout(() => bot.helpers.deleteMessage(msg.channelId.toString(), msg.id).catch(() => {}), 15000);
                 } catch (err) {
                   console.error("Failed to send followup:", err);
                 }
@@ -188,7 +190,7 @@ const bot = createBot({
           const token = interaction.token;
           for (const userId of config.watchedUserIds) {
             try {
-              await bot.helpers.sendFollowupMessage(token, {
+              const msg = await bot.helpers.sendFollowupMessage(token, {
                 content:
                   "Let's just say... you won't be hearing from <@" +
                   userId +
@@ -196,6 +198,7 @@ const bot = createBot({
                   duration.toString() +
                   " seconds...",
               });
+              setTimeout(() => bot.helpers.deleteMessage(msg.channelId.toString(), msg.id).catch(() => {}), 15000);
             } catch (err) {
               console.error("Failed to send followup:", err);
             }
