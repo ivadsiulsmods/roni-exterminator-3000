@@ -60,10 +60,6 @@ const bot = createBot({
 
       if (!config.watchedUserIds.includes(userId)) return;
 
-      await bot.helpers.sendMessage(message.channelId.toString(), {
-        content: "Bro is watched!?!",
-      });
-
       if (usersPreventedFromMessaging.has(userId)) {
         try {
           await bot.helpers.deleteMessage(
@@ -92,39 +88,16 @@ const bot = createBot({
         return;
       }
 
-      await bot.helpers.sendMessage(message.channelId.toString(), {
-        content: "Here we go twinnn",
-      });
-
       const content = message.content ?? "";
       const hasGifAttachment = message.attachments?.some(
         (att: { contentType?: string }) =>
           att.contentType?.includes("image/gif"),
       );
 
-      const getMsgContent = () => {
-        let response = "(debug, " + "<@" + "1221457893522669662" + ">";
-
-        if (isGifOrInstagramLink(content)) {
-          response = response + "yes (link)";
-        }
-        if (hasGifAttachment) {
-          response = response + "yes (attachment)";
-        }
-
-        return response;
-      };
-
-      await bot.helpers.sendMessage(message.channelId.toString(), {
-        content: getMsgContent(),
-      });
-
       if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
 
-      console.log(isGifOrInstagramLink(content), hasGifAttachment);
-
       bot.helpers
-        .deleteMessage(message.channelId, message.id)
+        .deleteMessage(message.channelId.toString(), message.id)
         .catch((e) => console.error("Failed to delete message:", e));
 
       const guildId = message.guildId;
