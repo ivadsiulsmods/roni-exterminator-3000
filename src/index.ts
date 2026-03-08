@@ -58,9 +58,17 @@ const bot = createBot({
 
       if (!message.guildId) return;
 
+      await bot.helpers.sendMessage(message.channelId.toString(), {
+        content:
+          "TEMPORARY DEBUG MESSAGE (im figuring this out right now doing panik fr fr)",
+      });
+
       if (!config.watchedUserIds.includes(userId)) return;
 
-      // --- Logic for users prevented from messaging ---
+      await bot.helpers.sendMessage(message.channelId.toString(), {
+        content: "Bro is watched!?!",
+      });
+
       if (usersPreventedFromMessaging.has(userId)) {
         try {
           await bot.helpers.deleteMessage(
@@ -88,6 +96,10 @@ const bot = createBot({
 
         return;
       }
+
+      await bot.helpers.sendMessage(message.channelId.toString(), {
+        content: "Here we go twinnn",
+      });
 
       const content = message.content ?? "";
       const hasGifAttachment = message.attachments?.some(
