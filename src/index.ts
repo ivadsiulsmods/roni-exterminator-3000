@@ -95,10 +95,6 @@ const bot = createBot({
           att.contentType?.includes("image/gif"),
       );
 
-      // FIX 1: Check if it is a gif/link FIRST
-      if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
-
-      // FIX 2: Variable shadowing fixed (renamed 'content' to 'response')
       const getMsgContent = () => {
         let response = "(debug, " + "<@" + "1221457893522669662" + ">";
 
@@ -112,14 +108,14 @@ const bot = createBot({
         return response;
       };
 
-      // Now we know it's a hit, we can safely send the debug message
       await bot.helpers.sendMessage(message.channelId.toString(), {
         content: getMsgContent(),
       });
 
+      if (!isGifOrInstagramLink(content) && !hasGifAttachment) return;
+
       console.log(isGifOrInstagramLink(content), hasGifAttachment);
 
-      // We already returned if it wasn't a gif/link, so we proceed to action
       bot.helpers
         .deleteMessage(message.channelId, message.id)
         .catch((e) => console.error("Failed to delete message:", e));
