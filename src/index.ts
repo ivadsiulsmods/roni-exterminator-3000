@@ -58,11 +58,6 @@ const bot = createBot({
 
       if (!message.guildId) return;
 
-      await bot.helpers.sendMessage(message.channelId.toString(), {
-        content:
-          "TEMPORARY DEBUG MESSAGE (im figuring this out right now doing panik fr fr)",
-      });
-
       if (!config.watchedUserIds.includes(userId)) return;
 
       await bot.helpers.sendMessage(message.channelId.toString(), {
