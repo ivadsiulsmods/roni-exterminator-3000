@@ -2,7 +2,7 @@ export const config = {
   watchedUserIds: [
     724142242708717589n, // roni
     // 1413923760121315409n, // random guy
-    1221457893522669662, // debug its shrimple
+    1221457893522669662n, // debug its shrimple
   ],
 
   timeoutDurationSeconds: 30,
