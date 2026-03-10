@@ -24,6 +24,7 @@ export const config = {
     gifer: /https?:\/\/gifer\.com\/\S+/i,
     instagram: /https?:\/\/(www\.)?instagram\.com\/\S+/i,
     kkinstagram: /https?:\/\/(www\.)?kkinstagram\.com\/\S+/i,
+    youtube: /https?:\/\/(www\.)?youtube\.com\/\S+/i,
     tenorGif: /https?:\/\/tenor\.com\/view\/\S+/i,
   },
 };
